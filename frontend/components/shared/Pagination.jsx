@@ -1,0 +1,69 @@
+'use client';
+
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+export default function Pagination({ currentPage, totalPages, onPageChange, className }) {
+  if (totalPages <= 1) return null;
+
+  const pages = [];
+  const maxVisible = 5;
+  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let end = Math.min(totalPages, start + maxVisible - 1);
+  if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  return (
+    <div className={cn('flex items-center justify-center gap-1', className)}>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="h-9 w-9"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </Button>
+
+      {start > 1 && (
+        <>
+          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onPageChange(1)}>1</Button>
+          {start > 2 && <span className="px-1 text-slate-400">...</span>}
+        </>
+      )}
+
+      {pages.map((page) => (
+        <Button
+          key={page}
+          variant={page === currentPage ? 'default' : 'outline'}
+          size="icon"
+          className="h-9 w-9"
+          onClick={() => onPageChange(page)}
+        >
+          {page}
+        </Button>
+      ))}
+
+      {end < totalPages && (
+        <>
+          {end < totalPages - 1 && <span className="px-1 text-slate-400">...</span>}
+          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onPageChange(totalPages)}>
+            {totalPages}
+          </Button>
+        </>
+      )}
+
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="h-9 w-9"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+}
