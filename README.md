@@ -96,9 +96,6 @@ To populate the database with initial categories, products, and an admin user, r
 cd backend
 npm run seed
 ```
-**Default Admin Credentials:**
-- Email: `admin@example.com`
-- Password: `admin@123`
 
 ## 📄 License
 This project is licensed under the MIT License.
