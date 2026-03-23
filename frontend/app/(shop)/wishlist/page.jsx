@@ -28,17 +28,33 @@ export default function WishlistPage() {
   }, [wishlistIds]);
 
   return (
-    <div className="container-custom py-10">
-      <div className="flex items-center gap-3 mb-6">
-        <Heart className="w-6 h-6 text-red-500 fill-red-500" />
-        <h1 className="text-2xl font-bold text-slate-900">My Wishlist</h1>
-        {products.length > 0 && <span className="text-sm text-slate-400">({products.length} items)</span>}
+    <div style={{ background: '#080808', minHeight: '100vh', paddingTop: '1px' }}>
+      <div className="container-custom py-12">
+        <div className="flex items-center gap-4 mb-10 pb-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <Heart style={{ width: '28px', height: '28px', color: '#b8976a', fill: 'rgba(184,151,106,0.15)' }} />
+          <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 300, color: 'white', lineHeight: 1, letterSpacing: '-0.02em' }}>
+            My Curations
+          </h1>
+          {products.length > 0 && (
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.25em', paddingLeft: '8px', paddingTop: '10px' }}>
+              {products.length} Pieces
+            </span>
+          )}
+        </div>
+        {wishlistIds.length === 0 ? (
+          <div style={{ padding: '4rem 0' }}>
+            <EmptyState 
+              icon={Heart} 
+              title="Your curation is empty" 
+              description="Save exceptional pieces you love to build your personal collection." 
+              actionLabel="Discover Pieces" 
+              actionHref="/products" 
+            />
+          </div>
+        ) : (
+          <ProductGrid products={products} loading={loading} skeletonCount={wishlistIds.length || 4} />
+        )}
       </div>
-      {wishlistIds.length === 0 ? (
-        <EmptyState icon={Heart} title="Your wishlist is empty" description="Save products you love by clicking the heart icon." actionLabel="Browse Products" actionHref="/products" />
-      ) : (
-        <ProductGrid products={products} loading={loading} skeletonCount={wishlistIds.length} />
-      )}
     </div>
   );
 }

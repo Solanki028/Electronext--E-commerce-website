@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-primary-700 font-black text-2xl">
             <Zap className="w-7 h-7 fill-primary-700" />
-            ElectroNest
+            Aspar
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-slate-900">Welcome back</h1>
           <p className="text-slate-500 mt-1">Sign in to your account</p>

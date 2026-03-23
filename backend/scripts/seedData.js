@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 // ─── Connect ────────────────────────────────────────────────────────────────
 console.log('🔌 Connecting to MongoDB...');
 await mongoose.connect(process.env.MONGODB_URI);
-console.log('✅ Connected:', process.env.MONGODB_URI.split('@')[1]);
+console.log(' Connected:', process.env.MONGODB_URI.split('@')[1]);
 
 // ─── Inline schemas (avoids ESM import complications) ───────────────────────
 const categorySchema = new mongoose.Schema(
@@ -625,9 +625,9 @@ const PRODUCTS_BY_CATEGORY = {
 console.log('\n🗑  Clearing existing categories and products...');
 await Product.deleteMany({});
 await Category.deleteMany({});
-console.log('✅ Cleared.\n');
+console.log(' Cleared.\n');
 
-console.log('📦 Inserting categories and products...\n');
+console.log(' Inserting categories and products...\n');
 
 let catCount = 0;
 let prodCount = 0;
@@ -636,7 +636,7 @@ for (const catData of CATEGORIES) {
   const catSlug = slug(catData.name);
   const category = await Category.create({ ...catData, slug: catSlug });
   catCount++;
-  console.log(`✅ Category: ${catData.name} (${category._id})`);
+  console.log(` Category: ${catData.name} (${category._id})`);
 
   const products = PRODUCTS_BY_CATEGORY[catData.name] || [];
   for (const prodData of products) {
@@ -645,14 +645,14 @@ for (const catData of CATEGORIES) {
     const topSku = prodSlug.replace(/-/g, '').toUpperCase().slice(0, 12);
     await Product.create({ ...prodData, slug: prodSlug, sku: topSku, category: category._id });
     prodCount++;
-    console.log(`   🛍  ${prodData.name}`);
+    console.log(`     ${prodData.name}`);
   }
 }
 
-console.log(`\n🎉 Seed complete!`);
+console.log(`\n Seed complete!`);
 console.log(`   Categories : ${catCount}`);
 console.log(`   Products   : ${prodCount}`);
-console.log(`\n🌐 Visit : http://localhost:3000\n`);
+console.log(`\n Visit : http://localhost:3000\n`);
 
 await mongoose.disconnect();
 process.exit(0);

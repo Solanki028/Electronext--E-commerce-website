@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
+import compression from 'compression';
 
 import corsOptions from './config/corsOptions.js';
 import { globalRateLimiter, authRateLimiter } from './middleware/rateLimit.middleware.js';
@@ -30,10 +31,11 @@ app.use(mongoSanitize());
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-// Body Parsing
+// Body Parsing & Compression
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+app.use(compression());
 
 // Global Rate Limiter
 app.use(globalRateLimiter);

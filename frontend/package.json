@@ -1,7 +1,7 @@
 {
-  "name": "electronest-frontend",
+  "name": "Aspar-frontend",
   "version": "1.0.0",
-  "description": "ElectroNest E-Commerce Frontend",
+  "description": "Aspar E-Commerce Frontend",
   "private": true,
   "scripts": {
     "dev": "next dev",

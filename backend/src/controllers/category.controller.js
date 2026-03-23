@@ -50,7 +50,7 @@ export const createCategory = async (req, res, next) => {
 
     let image = { url: '', publicId: '' };
     if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer, { folder: 'electronest/categories' });
+      const result = await uploadToCloudinary(req.file.buffer, { folder: 'Aspar/categories' });
       image = { url: result.url, publicId: result.publicId };
     }
 
@@ -82,7 +82,7 @@ export const updateCategory = async (req, res, next) => {
 
     if (req.file) {
       if (category.image?.publicId) await deleteFromCloudinary(category.image.publicId);
-      const result = await uploadToCloudinary(req.file.buffer, { folder: 'electronest/categories' });
+      const result = await uploadToCloudinary(req.file.buffer, { folder: 'Aspar/categories' });
       updates.image = { url: result.url, publicId: result.publicId };
     }
 

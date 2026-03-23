@@ -36,7 +36,7 @@ export const createBanner = async (req, res, next) => {
   try {
     if (!req.file) throw new ApiError(400, 'Banner image is required');
 
-    const result = await uploadToCloudinary(req.file.buffer, { folder: 'electronest/banners' });
+    const result = await uploadToCloudinary(req.file.buffer, { folder: 'Aspar/banners' });
 
     const banner = await Banner.create({
       ...req.body,
@@ -58,7 +58,7 @@ export const updateBanner = async (req, res, next) => {
 
     if (req.file) {
       if (banner.image?.publicId) await deleteFromCloudinary(banner.image.publicId);
-      const result = await uploadToCloudinary(req.file.buffer, { folder: 'electronest/banners' });
+      const result = await uploadToCloudinary(req.file.buffer, { folder: 'Aspar/banners' });
       updates.image = { url: result.url, publicId: result.publicId, alt: req.body.title || banner.title };
     }
 

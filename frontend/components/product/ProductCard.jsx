@@ -3,24 +3,28 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ShoppingCart, Heart, Eye, Star } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatters';
 import useCart from '@/hooks/useCart';
 import useWishlist from '@/hooks/useWishlist';
 
+const GOLD = '#b8976a';
+
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { toggle: toggleWishlist, isWishlisted } = useWishlist();
   const [addingToCart, setAddingToCart] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   if (!product) return null;
 
   const wishlisted = isWishlisted(product._id);
-  const discountedPrice = product.discountedPrice || product.price;
-  const hasDiscount = product.discountPercent > 0;
+  const discountedPrice = product.salePrice ?? product.price;
+  const originalPrice = product.originalPrice ?? product.mrp;
+  const hasDiscount = originalPrice && originalPrice > discountedPrice;
+  const discount = product.discountPercent || (hasDiscount ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) : 0);
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -37,88 +41,114 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <Link href={`/product/${product.slug}`} className="block group">
-      <div className="product-card h-full flex flex-col">
-        {/* Image */}
-        <div className="relative overflow-hidden bg-slate-50 aspect-square">
-          {hasDiscount && (
-            <span className="absolute top-2 left-2 z-10 badge-discount">
-              -{product.discountPercent}%
+    <Link href={`/product/${product.slug}`} className="block group h-full">
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="h-full flex flex-col relative overflow-hidden transition-all duration-500"
+        style={{
+          background: hovered ? '#111111' : '#0a0a0a',
+          border: '1px solid rgba(255,255,255,0.04)',
+          transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+          boxShadow: hovered ? '0 20px 40px rgba(0,0,0,0.8)' : '0 4px 20px rgba(0,0,0,0.4)'
+        }}
+      >
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 right-3 z-30 flex justify-between items-start pointer-events-none">
+          {discount > 0 ? (
+            <span style={{ background: GOLD, color: '#000', padding: '4px 8px', fontFamily: "'Montserrat', sans-serif", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              -{discount}%
             </span>
-          )}
+          ) : product.isFeatured ? (
+            <span style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', border: `1px solid ${GOLD}44`, color: GOLD, padding: '4px 8px', fontFamily: "'Montserrat', sans-serif", fontSize: '0.55rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Featured
+            </span>
+          ) : <div/>}
 
+          <button
+            onClick={handleWishlist}
+            className="pointer-events-auto"
+            style={{ 
+              width: '32px', height: '32px', 
+              borderRadius: '50%', 
+              background: wishlisted ? 'rgba(184,151,106,0.15)' : 'rgba(0,0,0,0.4)', 
+              backdropFilter: 'blur(4px)',
+              border: `1px solid ${wishlisted ? GOLD : 'rgba(255,255,255,0.1)'}`, 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.3s'
+            }}
+          >
+            <Heart style={{ width: '14px', height: '14px', color: wishlisted ? GOLD : 'white', fill: wishlisted ? GOLD : 'none' }} />
+          </button>
+        </div>
+
+        {/* Image */}
+        <div className="relative aspect-square flex items-center justify-center p-6" style={{ background: '#0d0d0d' }}>
           {product.stock === 0 && (
-            <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
-              <span className="bg-white text-slate-800 font-semibold text-xs px-3 py-1 rounded-full">
+            <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center backdrop-blur-sm">
+              <span style={{ fontFamily: "'Montserrat', sans-serif", color: 'white', fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 16px' }}>
                 Out of Stock
               </span>
             </div>
           )}
 
           <Image
-            src={product.images?.[0]?.url || '/placeholder-product.jpg'}
-            alt={product.images?.[0]?.alt || product.name}
+            src={product.images?.[0]?.url || product.image?.url || '/placeholder.jpg'}
+            alt={product.name}
             fill
-            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain p-6 mix-blend-screen transition-transform duration-700"
+            style={{ transform: hovered ? 'scale(1.08)' : 'scale(1)' }}
+            sizes="(max-width: 640px) 50vw, 25vw"
           />
 
-          {/* Hover actions */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300">
-            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <button
-                onClick={handleWishlist}
-                className={cn(
-                  'w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform',
-                  wishlisted && 'bg-red-50'
-                )}
-                aria-label="Toggle wishlist"
+          {/* Quick Add overlay */}
+          {product.stock > 0 && (
+            <div 
+              className="absolute inset-x-4 bottom-4 z-20 transition-all duration-300 pointer-events-none"
+              style={{ opacity: hovered ? 1 : 0, transform: hovered ? 'translateY(0)' : 'translateY(10px)' }}
+            >
+              <Button
+                className="w-full pointer-events-auto rounded-none"
+                style={{ background: GOLD, color: '#000', fontFamily: "'Montserrat', sans-serif", fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', height: '40px' }}
+                onClick={handleAddToCart}
+                disabled={addingToCart}
               >
-                <Heart
-                  className={cn('w-4 h-4', wishlisted ? 'fill-red-500 text-red-500' : 'text-slate-600')}
-                />
-              </button>
+                {addingToCart ? 'Adding...' : 'Quick Add'}
+              </Button>
             </div>
-
-            {product.stock > 0 && (
-              <div className="absolute bottom-2 inset-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <Button
-                  size="sm"
-                  className="w-full gap-2 bg-primary-700 hover:bg-primary-600 text-xs shadow-lg"
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                >
-                  <ShoppingCart className="w-3.5 h-3.5" />
-                  {addingToCart ? 'Adding...' : 'Quick Add'}
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Info */}
-        <div className="p-3 flex flex-col flex-1">
-          <p className="text-xs text-slate-400 font-medium uppercase tracking-wide mb-1">
-            {product.brand}
-          </p>
-          <h3 className="text-sm font-semibold text-slate-900 line-clamp-2 mb-2 flex-1">
+        <div className="p-4 flex flex-col flex-1" style={{ borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+          {/* Brand & Stars */}
+          <div className="flex justify-between items-center mb-2">
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.25em' }}>
+              {product.brand || 'Luxury'}
+            </p>
+            {product.reviewCount > 0 && (
+              <div className="flex items-center gap-1">
+                <Star style={{ width: '10px', height: '10px', fill: GOLD, color: GOLD }} />
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{product.averageRating}</span>
+              </div>
+            )}
+          </div>
+
+          <h3 
+            className="flex-1"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', color: hovered ? 'white' : 'rgba(255,255,255,0.9)', lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', marginBottom: '12px', transition: 'color 0.3s' }}
+          >
             {product.name}
           </h3>
 
-          {/* Rating */}
-          {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-xs font-medium text-slate-700">{product.averageRating}</span>
-              <span className="text-xs text-slate-400">({product.reviewCount})</span>
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2">
-            <span className="price-discounted">{formatPrice(discountedPrice)}</span>
+          <div className="flex items-baseline gap-2 mt-auto">
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', fontWeight: 600, color: 'white' }}>
+              {formatPrice(discountedPrice)}
+            </span>
             {hasDiscount && (
-              <span className="price-original">{formatPrice(product.price)}</span>
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', textDecoration: 'line-through' }}>
+                {formatPrice(originalPrice)}
+              </span>
             )}
           </div>
         </div>

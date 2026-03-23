@@ -57,7 +57,13 @@ function ProductsContent() {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value);
     else params.delete(key);
-    params.delete('page');
+    
+    // Crucial Bug Fix: Only reset to page 1 if the user changed a FILTER (like sort, category, brand).
+    // If they clicked the pagination 'Next' button, the key is 'page', so we do NOT delete it.
+    if (key !== 'page') {
+      params.delete('page');
+    }
+    
     router.push(`/products?${params.toString()}`);
   };
 
@@ -69,17 +75,19 @@ function ProductsContent() {
   ].filter(Boolean);
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {search ? `Results for "${search}"` : 'All Products'}
-          </h1>
-          {!loading && (
-            <p className="text-sm text-slate-500 mt-1">{pagination.total} products found</p>
-          )}
-        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 300, color: 'white', lineHeight: 1, letterSpacing: '-0.02em' }}>
+              {search ? `Results for "${search}"` : 'The Collection'}
+            </h1>
+            {!loading && (
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.25em', marginTop: '12px' }}>
+                {pagination.total} extraordinary pieces
+              </p>
+            )}
+          </div>
 
         <div className="flex items-center gap-3">
           <Select value={sort} onValueChange={(v) => updateParam('sort', v)}>
@@ -143,8 +151,10 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="container-custom py-8"><ProductGrid loading={true} /></div>}>
-      <ProductsContent />
-    </Suspense>
+    <div style={{ background: '#080808', minHeight: '100vh' }}>
+      <Suspense fallback={<div className="container-custom py-12"><ProductGrid loading={true} /></div>}>
+        <ProductsContent />
+      </Suspense>
+    </div>
   );
 }

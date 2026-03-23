@@ -31,41 +31,67 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="container-custom py-10">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">My Orders</h1>
-        <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-24 rounded-xl" />)}</div>
+      <div style={{ background: '#080808', minHeight: '100vh', paddingTop: '1px' }}>
+        <div className="container-custom py-12 max-w-4xl">
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: 'white', marginBottom: '2rem' }}>Past Orders</h1>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse h-28 rounded-none border border-white/5" style={{ background: '#0a0a0a' }} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container-custom py-10 max-w-4xl">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">My Orders</h1>
-      {orders.length === 0 ? (
-        <EmptyState icon={Package} title="No orders yet" description="You haven't placed any orders yet." actionLabel="Start Shopping" actionHref="/products" />
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => {
-            const statusConfig = ORDER_STATUSES[order.status] || ORDER_STATUSES.pending;
-            return (
-              <Link key={order._id} href={`/orders/${order._id}`} className="block bg-white rounded-xl border hover:border-primary-200 hover:shadow-md transition-all p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">Order #{order.orderNumber}</p>
-                    <p className="text-sm text-slate-400 mt-0.5">{formatDate(order.createdAt)} · {order.items.length} item(s)</p>
+    <div style={{ background: '#080808', minHeight: '100vh', paddingTop: '1px' }}>
+      <div className="container-custom py-12 max-w-4xl">
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: 'white', marginBottom: '2rem', letterSpacing: '-0.02em' }}>Past Orders</h1>
+        {orders.length === 0 ? (
+          <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', padding: '4rem 2rem', textAlign: 'center' }}>
+            <Package style={{ width: '40px', height: '40px', color: 'rgba(255,255,255,0.2)', margin: '0 auto 1rem' }} />
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: 'white', marginBottom: '0.5rem' }}>No Orders Found</h3>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2rem' }}>You haven&apos;t placed any orders with us yet.</p>
+            <Link href="/products" style={{ display: 'inline-block', background: '#b8976a', color: '#000', fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', padding: '1rem 2rem' }}>
+              Explore Collection
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map((order) => {
+              const statusConfig = ORDER_STATUSES[order.status] || ORDER_STATUSES.pending;
+              return (
+                <Link key={order._id} href={`/orders/${order._id}`} className="block transition-all p-6 group" style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>
+                        Order Ref.
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: 'white', lineHeight: 1.2 }}>
+                        #{order.orderNumber}
+                      </p>
+                      <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '8px' }}>
+                        {formatDate(order.createdAt)} <span style={{ padding: '0 8px', color: 'rgba(255,255,255,0.2)' }}>|</span> {order.items.length} {order.items.length === 1 ? 'Piece' : 'Pieces'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <span className={`text-[0.65rem] font-bold px-3 py-1 uppercase tracking-widest ${statusConfig.color}`} style={{ background: 'transparent', border: `1px solid currentColor` }}>
+                        {statusConfig.label}
+                      </span>
+                      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#b8976a', fontWeight: 600 }}>
+                        {formatPrice(order.total)}
+                      </p>
+                      <ChevronRight className="w-5 h-5 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" style={{ color: '#b8976a' }} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusConfig.color}`}>{statusConfig.label}</span>
-                    <p className="font-bold text-primary-700">{formatPrice(order.total)}</p>
-                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 hidden sm:block" />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-          <Pagination currentPage={pagination.page} totalPages={pagination.pages} onPageChange={setPage} className="mt-6" />
-        </div>
-      )}
+                </Link>
+              );
+            })}
+            <Pagination currentPage={pagination.page} totalPages={pagination.pages} onPageChange={setPage} className="mt-8" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

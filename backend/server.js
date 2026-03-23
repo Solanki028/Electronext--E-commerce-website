@@ -9,9 +9,9 @@ const startServer = async () => {
     await connectDB();
 
     const server = app.listen(PORT, () => {
-      console.log(`\n🚀 ElectroNest Server running on port ${PORT}`);
-      console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 API Base: http://localhost:${PORT}/api`);
+      console.log(`\n Aspar Server running on port ${PORT}`);
+      console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(` API Base: http://localhost:${PORT}/api`);
     });
 
     // Graceful shutdown

@@ -11,7 +11,7 @@ import ApiError from '../utils/ApiError.js';
 export const uploadToCloudinary = (buffer, options = {}) => {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
-      folder: options.folder || 'electronest',
+      folder: options.folder || 'Aspar',
       resource_type: 'image',
       quality: 'auto',
       fetch_format: 'auto',

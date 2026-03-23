@@ -40,7 +40,7 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentMethod
 
     const pricing = calculateItemPricing(product.price, product.discountPercent, item.quantity);
 
-    orderItems.push({
+    const orderItem = {
       product: product._id,
       name: product.name,
       image: product.images?.[0]?.url || '',
@@ -49,9 +49,10 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentMethod
       discountPercent: product.discountPercent || 0,
       discountedPrice: pricing.discountedPrice,
       quantity: item.quantity,
-      variant: item.variant || undefined,
       sku: product.sku,
-    });
+    };
+    if (item.variant) orderItem.variant = item.variant;
+    orderItems.push(orderItem);
   }
 
   const coupon = cart.coupon;

@@ -118,14 +118,21 @@ export const useCart = () => {
 
   const openCart = useCallback(() => dispatch(toggleCart()), [dispatch]);
 
+  const guestSubtotal = guestItems.reduce((acc, item) => {
+    const p = item.product || item || {};
+    const originalPrice = p.price || p.mrp || item.price || 0;
+    const salePrice = p.salePrice || item.discountedPrice || (originalPrice * (1 - ((p.discountPercent || 0)/100)));
+    return acc + (salePrice * item.quantity);
+  }, 0);
+
   return {
     cart,
     items: cart?.items || [],
     itemCount,
     isCartOpen,
     isLoading,
-    subtotal: serverCart?.subtotal || 0,
-    total: serverCart?.total || 0,
+    subtotal: isAuthenticated ? (serverCart?.subtotal || 0) : guestSubtotal,
+    total: isAuthenticated ? (serverCart?.total || 0) : guestSubtotal,
     couponDiscount: serverCart?.couponDiscount || 0,
     fetchCart,
     addToCart,

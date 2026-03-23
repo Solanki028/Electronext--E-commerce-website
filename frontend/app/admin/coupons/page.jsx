@@ -27,7 +27,7 @@ export default function AdminCouponsPage() {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({ resolver: zodResolver(couponSchema) });
 
   const fetch = async () => {
-    try { const res = await couponService.getAllCoupons(); setCoupons(res.data || []); }
+    try { const res = await couponService.getAllCoupons(); setCoupons(res.data?.coupons || []); }
     catch {} finally { setLoading(false); }
   };
 

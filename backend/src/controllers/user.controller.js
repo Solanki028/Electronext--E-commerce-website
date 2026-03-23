@@ -42,7 +42,7 @@ export const updateAvatar = async (req, res, next) => {
     }
 
     const result = await uploadToCloudinary(req.file.buffer, {
-      folder: 'electronest/avatars',
+      folder: 'Aspar/avatars',
       transformation: [{ width: 300, height: 300, crop: 'fill', gravity: 'face' }],
     });
 

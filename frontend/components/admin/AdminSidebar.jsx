@@ -53,7 +53,7 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-100 min-h-screen sticky top-0">
         <div className="flex items-center gap-2 px-6 h-16 border-b border-slate-100">
           <Zap className="w-6 h-6 text-primary-700 fill-primary-700" />
-          <span className="font-black text-lg text-slate-900">ElectroNest</span>
+          <span className="font-black text-lg text-slate-900">Aspar</span>
           <span className="text-xs font-medium text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded ml-auto">Admin</span>
         </div>
         <NavLinks />
@@ -71,7 +71,7 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
           <aside className="relative flex flex-col w-64 bg-white min-h-screen">
             <div className="flex items-center gap-2 px-6 h-16 border-b">
               <Zap className="w-6 h-6 text-primary-700 fill-primary-700" />
-              <span className="font-black text-lg">ElectroNest Admin</span>
+              <span className="font-black text-lg">Aspar Admin</span>
               <Button variant="ghost" size="icon" className="ml-auto" onClick={onClose}>
                 <X className="w-4 h-4" />
               </Button>

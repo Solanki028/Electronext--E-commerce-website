@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categoryService } from '@/services/categoryService';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -16,22 +15,18 @@ import api from '@/services/api';
 export default function CategoryForm({ categoryId = null, onSuccess }) {
   const router = useRouter();
   const isEdit = !!categoryId;
-  const [allCategories, setAllCategories] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [existingImage, setExistingImage] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [selectedParent, setSelectedParent] = useState('');
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
 
   useEffect(() => {
-    categoryService.getCategories().then(res => setAllCategories(res.data || []));
     if (isEdit) {
       categoryService.getCategoryById(categoryId).then(res => {
         const c = res.data;
         setValue('name', c.name);
         setValue('description', c.description);
-        setSelectedParent(c.parent?._id || '');
         setExistingImage(c.image?.url || null);
       });
     }
@@ -43,7 +38,6 @@ export default function CategoryForm({ categoryId = null, onSuccess }) {
       const fd = new FormData();
       fd.append('name', data.name);
       if (data.description) fd.append('description', data.description);
-      if (selectedParent) fd.append('parent', selectedParent);
       if (imageFile) fd.append('image', imageFile);
 
       if (isEdit) {
@@ -71,21 +65,6 @@ export default function CategoryForm({ categoryId = null, onSuccess }) {
       <div>
         <Label>Description</Label>
         <Textarea className="mt-1" rows={3} {...register('description')} placeholder="Brief description of this category" />
-      </div>
-
-      <div>
-        <Label>Parent Category</Label>
-        <Select value={selectedParent} onValueChange={setSelectedParent}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="None (root category)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">None (Root)</SelectItem>
-            {allCategories
-              .filter(c => c._id !== categoryId)
-              .map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
       </div>
 
       <div>

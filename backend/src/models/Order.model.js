@@ -15,8 +15,8 @@ const orderItemSchema = new mongoose.Schema(
     discountedPrice: { type: Number, required: true },
     quantity: { type: Number, required: true, min: 1 },
     variant: {
-      name: String,
-      value: String,
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     sku: { type: String, default: '' },
   },

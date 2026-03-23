@@ -9,7 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate } from '@/lib/formatters';
+import { categoryService } from '@/services/categoryService';
+import { productService } from '@/services/productService';
 import api from '@/services/api';
 import { toast } from 'sonner';
 
@@ -22,15 +25,24 @@ export default function AdminBannersPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title: '', subtitle: '', link: '', buttonText: 'Shop Now', position: 'hero', isActive: true, startDate: '', endDate: '' });
   const [imageFile, setImageFile] = useState(null);
+  
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [linkType, setLinkType] = useState('custom');
+  const [productSearch, setProductSearch] = useState('');
 
   const fetch = async () => {
-    try { const res = await api.get('/banners/admin'); setBanners(res.data.data || []); }
-    catch {} finally { setLoading(false); }
+    try { const res = await api.get('/banners/admin/all'); setBanners(res.data.data || []); }
+    catch (err) { toast.error('Failed to load banners'); } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { 
+    fetch(); 
+    categoryService.getCategories().then(res => setCategories(res.data || []));
+    productService.getProducts({ limit: 1000 }).then(res => setProducts(res.data.products || []));
+  }, []);
 
-  const openCreate = () => { setForm({ title: '', subtitle: '', link: '', buttonText: 'Shop Now', position: 'hero', isActive: true, startDate: '', endDate: '' }); setImageFile(null); setEditingId(null); setOpen(true); };
+  const openCreate = () => { setForm({ title: '', subtitle: '', link: '', buttonText: 'Shop Now', position: 'hero', isActive: true, startDate: '', endDate: '' }); setImageFile(null); setEditingId(null); setLinkType('custom'); setProductSearch(''); setOpen(true); };
 
   const handleSave = async () => {
     setSaving(true);
@@ -78,7 +90,17 @@ export default function AdminBannersPage() {
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setForm({ title: b.title, subtitle: b.subtitle || '', link: b.link || '', buttonText: b.buttonText || 'Shop Now', position: b.position, isActive: b.isActive, startDate: b.startDate?.slice(0,10) || '', endDate: b.endDate?.slice(0,10) || '' }); setEditingId(b._id); setOpen(true); }}><Edit2 className="w-3.5 h-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { 
+                      const link = b.link || '';
+                      let type = 'custom';
+                      if (link.startsWith('/category/')) type = 'category';
+                      else if (link.startsWith('/product/')) type = 'product';
+                      setForm({ title: b.title, subtitle: b.subtitle || '', link, buttonText: b.buttonText || 'Shop Now', position: b.position, isActive: b.isActive, startDate: b.startDate?.slice(0,10) || '', endDate: b.endDate?.slice(0,10) || '' }); 
+                      setLinkType(type);
+                      setProductSearch('');
+                      setEditingId(b._id); 
+                      setOpen(true); 
+                    }}><Edit2 className="w-3.5 h-3.5" /></Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => setDeleteId(b._id)}><Trash2 className="w-3.5 h-3.5" /></Button>
                   </div>
                 </div>
@@ -91,10 +113,76 @@ export default function AdminBannersPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingId ? 'Edit Banner' : 'New Banner'}</DialogTitle></DialogHeader>
-          <div className="space-y-3 mt-2">
+          <div className="space-y-4 mt-2">
             <div><Label>Title *</Label><Input className="mt-1" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} /></div>
             <div><Label>Subtitle</Label><Input className="mt-1" value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} /></div>
-            <div><Label>Link URL</Label><Input className="mt-1" value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} /></div>
+            
+            <div className="space-y-3 p-4 border rounded-xl bg-slate-50/50">
+              <div>
+                <Label>Link Target Type</Label>
+                <Select value={linkType} onValueChange={setLinkType}>
+                  <SelectTrigger className="mt-1 bg-white"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">Custom URL</SelectItem>
+                    <SelectItem value="category">Category</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {linkType === 'category' && (
+                <div>
+                  <Label>Select Category</Label>
+                  <Select 
+                    onValueChange={v => setForm(f => ({ ...f, link: `/category/${v}` }))}
+                    value={form.link.startsWith('/category/') ? form.link.split('/category/')[1] : ''}
+                  >
+                    <SelectTrigger className="mt-1 bg-white"><SelectValue placeholder="Choose a category" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => <SelectItem key={c._id} value={c.slug}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {linkType === 'product' && (
+                <div className="space-y-2">
+                  <Label>Search & Select Product</Label>
+                  <Input 
+                    placeholder="Type to filter products..." 
+                    value={productSearch} 
+                    onChange={e => setProductSearch(e.target.value)} 
+                    className="bg-white h-9" 
+                  />
+                  <Select 
+                    onValueChange={v => setForm(f => ({ ...f, link: `/product/${v}` }))}
+                    value={form.link.startsWith('/product/') ? form.link.split('/product/')[1] : ''}
+                  >
+                    <SelectTrigger className="bg-white"><SelectValue placeholder="Choose a product" /></SelectTrigger>
+                    <SelectContent>
+                      {products
+                        .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                        .slice(0, 50)
+                        .map(p => <SelectItem key={p._id} value={p.slug}>{p.name}</SelectItem>)
+                      }
+                      {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).length === 0 && (
+                        <div className="p-2 text-sm text-slate-500 text-center">No products found.</div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {linkType === 'custom' && (
+                <div>
+                  <Label>Custom Link URL</Label>
+                  <Input className="mt-1 bg-white" placeholder="/about, /sale, etc." value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} />
+                </div>
+              )}
+              
+              <p className="text-xs text-slate-500 mt-1">Generated URL: <strong>{form.link || 'None selected'}</strong></p>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Button Text</Label><Input className="mt-1" value={form.buttonText} onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))} /></div>
               <div><Label>Start Date</Label><Input type="date" className="mt-1" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} /></div>

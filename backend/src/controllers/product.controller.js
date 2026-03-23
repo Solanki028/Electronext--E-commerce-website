@@ -19,9 +19,11 @@ export const getProducts = async (req, res, next) => {
       search,
       isFeatured,
       inStock,
+      minDiscount,
     } = req.query;
 
     const filter = { isActive: true };
+    if (minDiscount) filter.discountPercent = { $gte: Number(minDiscount) };
 
     if (search) {
       filter.$text = { $search: search };
@@ -126,7 +128,7 @@ export const createProduct = async (req, res, next) => {
     if (req.files && req.files.length > 0) {
       const uploaded = await uploadManyToCloudinary(
         req.files.map((f) => f.buffer),
-        { folder: 'electronest/products' }
+        { folder: 'Aspar/products' }
       );
       images = uploaded.map((r, i) => ({
         url: r.url,
@@ -181,7 +183,7 @@ export const updateProduct = async (req, res, next) => {
     if (req.files && req.files.length > 0) {
       const uploaded = await uploadManyToCloudinary(
         req.files.map((f) => f.buffer),
-        { folder: 'electronest/products' }
+        { folder: 'Aspar/products' }
       );
       const newImages = uploaded.map((r, i) => ({
         url: r.url,

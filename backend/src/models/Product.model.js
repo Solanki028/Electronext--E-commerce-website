@@ -119,6 +119,7 @@ productSchema.virtual('discountedPrice').get(function () {
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
 productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
+productSchema.index({ discountPercent: -1 });
 productSchema.index({ averageRating: -1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ isFeatured: 1 });

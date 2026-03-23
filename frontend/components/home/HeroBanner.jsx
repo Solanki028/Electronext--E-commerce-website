@@ -3,121 +3,233 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import api from '@/services/api';
+import { ShoppingBag, ChevronRight } from 'lucide-react';
 
-export default function HeroBanner() {
-  const [banners, setBanners] = useState([]);
+const GOLD = '#b8976a';
+
+const FALLBACK_SLIDES = [
+  {
+    id: 1,
+    image: '/images/mockups/hero_1.png',
+    tagline: 'FLAGSHIP SERIES',
+    title: 'The Obsidian Collection',
+    description: 'Experience unparalleled performance with our new premium dark curation of high-end smartphones.',
+    link: '/category/smartphones',
+    linkText: 'Explore Collection'
+  },
+  {
+    id: 2,
+    image: '/images/mockups/hero_2.png',
+    tagline: 'PRO PERFORMANCE',
+    title: 'Ultra-Thin Mastery',
+    description: 'Unleash your creative potential with the next generation of portable computing edge.',
+    link: '/category/laptops',
+    linkText: 'Discover Laptops'
+  },
+  {
+    id: 3,
+    image: '/images/mockups/hero_banner_1773930188095.png',
+    tagline: 'SIGNATURE SOUND',
+    title: 'Auditory Perfection',
+    description: 'Immerse yourself in flawless high-fidelity audio engineering with our studio noise-cancelling range.',
+    link: '/category/headphones',
+    linkText: 'Shop Audio'
+  }
+];
+
+export default function HeroBanner({ initialBanners = [] }) {
+  const [slides, setSlides] = useState(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      return initialBanners.map((b, i) => ({
+        id: b._id || i,
+        image: b.image?.url || '',
+        tagline: b.subtitle || 'FEATURED',
+        title: b.title || 'Special Offer',
+        description: '', 
+        link: b.link || '/products',
+        linkText: b.buttonText || 'Shop Now'
+      }));
+    }
+    return FALLBACK_SLIDES;
+  });
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    api.get('/banners?position=hero').then(res => setBanners(res.data.data || [])).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (banners.length <= 1) return;
-    const timer = setInterval(() => setCurrent(c => (c + 1) % banners.length), 5000);
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 6000);
     return () => clearInterval(timer);
-  }, [banners.length]);
-
-  // Fallback static hero if no banners
-  if (!banners.length) {
-    return (
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-primary-900 to-indigo-900 text-white">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-72 h-72 bg-primary-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-10 w-56 h-56 bg-indigo-400 rounded-full blur-3xl" />
-        </div>
-        <div className="container-custom relative py-24 md:py-32">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-5">
-              <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-              New Season — Up to 40% Off
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black leading-tight mb-5">
-              Premium Electronics<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
-                At Your Fingertips
-              </span>
-            </h1>
-            <p className="text-slate-300 text-lg mb-8">
-              Discover the latest smartphones, laptops, and accessories with warranty and free returns.
-            </p>
-            <div className="flex gap-3 flex-col sm:flex-row">
-              <Button size="lg" className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold" asChild>
-                <Link href="/products">Shop Now</Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
-                <Link href="/category/smartphones">Browse Smartphones</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const banner = banners[current];
+  }, [slides.length]);
 
   return (
-    <section className="relative overflow-hidden bg-slate-900 text-white h-[480px] md:h-[580px]">
-      {/* Slides */}
-      {banners.map((b, i) => (
-        <div
-          key={b._id}
-          className={cn(
-            'absolute inset-0 transition-opacity duration-700',
-            i === current ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          )}
+    <section className="relative w-full overflow-hidden" style={{ height: 'calc(100vh - 80px)', minHeight: '600px', background: '#080808' }}>
+      
+      {/* Images Layer */}
+      {slides.map((slide, idx) => (
+        <div 
+          key={slide.id}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: current === idx ? 1 : 0, zIndex: 0 }}
         >
-          {b.image?.url && (
-            <Image src={b.image.url} alt={b.title} fill className="object-cover opacity-50" priority={i === 0} />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-          <div className="container-custom relative h-full flex items-center">
-            <div className="max-w-xl">
-              <h1 className="text-4xl md:text-5xl font-black leading-tight mb-3">{b.title}</h1>
-              {b.subtitle && <p className="text-lg text-slate-300 mb-6">{b.subtitle}</p>}
-              {b.link && (
-                <Button size="lg" className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold" asChild>
-                  <Link href={b.link}>{b.buttonText || 'Shop Now'}</Link>
-                </Button>
-              )}
-            </div>
-          </div>
+          <Image 
+            src={slide.image} 
+            alt={slide.title} 
+            fill 
+            sizes="100vw"
+            priority={idx === 0}
+            className="object-cover object-center"
+            style={{ 
+              transform: current === idx ? 'scale(1.05)' : 'scale(1)',
+              transition: 'transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            }}
+          />
         </div>
       ))}
 
-      {/* Controls */}
-      {banners.length > 1 && (
-        <>
-          <button
-            onClick={() => setCurrent(c => (c === 0 ? banners.length - 1 : c - 1))}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setCurrent(c => (c + 1) % banners.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+      {/* 
+        Instead of a heavy black fade covering the whole image, 
+        we use a crisp transparent-to-black gradient only on the left 
+        and bottom so the image remains 100% sharp everywhere else. 
+      */}
+      <div 
+        className="absolute inset-0 z-10" 
+        style={{ 
+          background: 'linear-gradient(to right, rgba(8,8,8,0.95) 0%, rgba(8,8,8,0.7) 35%, transparent 65%)'
+        }} 
+      />
+      <div 
+        className="absolute inset-x-0 bottom-0 z-10 h-32" 
+        style={{ background: 'linear-gradient(to top, #090909 0%, transparent 100%)' }}
+      />
 
-          {/* Dot indicators */}
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-            {banners.map((_, i) => (
+      {/* Content Layer */}
+      <div className="container-custom h-full relative z-20 flex items-center">
+        <div className="max-w-2xl px-4 md:px-8">
+          {slides.map((slide, idx) => {
+            const isActive = current === idx;
+            return (
+              <div 
+                key={slide.id} 
+                className="absolute top-1/2 -translate-y-1/2 w-full max-w-xl transition-all duration-1000 ease-in-out"
+                style={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive ? 'translateY(-50%)' : 'translateY(-40%)',
+                  pointerEvents: isActive ? 'auto' : 'none'
+                }}
+              >
+                <div 
+                  style={{ 
+                    fontFamily: "'Montserrat', sans-serif", 
+                    fontSize: '0.7rem', 
+                    letterSpacing: '0.4em', 
+                    color: GOLD, 
+                    fontWeight: 600, 
+                    marginBottom: '1.5rem',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {slide.tagline}
+                </div>
+                
+                <h1 
+                  style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 'clamp(3.5rem, 6vw, 5.5rem)',
+                    fontWeight: 300,
+                    color: 'white',
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                    marginBottom: '1.5rem'
+                  }}
+                >
+                  {slide.title}
+                </h1>
+                
+                {slide.description && (
+                  <p 
+                    style={{ 
+                      fontFamily: "'Montserrat', sans-serif", 
+                      fontSize: '0.8rem', 
+                      color: 'rgba(255,255,255,0.6)', 
+                      lineHeight: 1.8,
+                      letterSpacing: '0.05em',
+                      marginBottom: '2.5rem',
+                      maxWidth: '85%'
+                    }}
+                  >
+                    {slide.description}
+                  </p>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <Link 
+                    href="/products" 
+                    className="flex items-center justify-center gap-3 px-8 py-4 transition-transform hover:scale-105"
+                    style={{ background: GOLD, color: 'black', fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}
+                  >
+                    <ShoppingBag className="w-4 h-4" /> Shop All
+                  </Link>
+                  
+                  <Link 
+                    href={slide.link}
+                    className="flex items-center gap-3 transition-opacity hover:opacity-70 group"
+                    style={{ color: 'white', fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}
+                  >
+                    {slide.linkText}
+                    <div className="w-8 h-[1px] bg-white transition-all group-hover:w-12" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Progress Indicators */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-10 left-0 w-full z-30">
+          <div className="container-custom px-4 md:px-8 flex items-center gap-4">
+            {slides.map((_, idx) => (
               <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={cn('h-1.5 rounded-full transition-all', i === current ? 'bg-white w-6' : 'bg-white/40 w-1.5')}
-              />
-            ))}
-          </div>
-        </>
+                key={idx}
+              onClick={() => setCurrent(idx)}
+              style={{
+                width: current === idx ? '36px' : '8px',
+                height: '3px',
+                background: current === idx ? GOLD : 'rgba(255,255,255,0.2)',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                transition: 'all 0.4s ease',
+              }}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      </div>
       )}
+
+      {/* Manual Controls */}
+      {slides.length > 1 && (
+        <div className="absolute right-8 md:right-16 bottom-10 z-30 flex gap-2 hidden md:flex">
+          <button
+            onClick={() => setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
+            className="flex items-center justify-center border border-white/10 hover:border-white/30 transition-colors"
+            style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+          >
+            <ChevronRight className="w-5 h-5 text-white rotate-180" />
+          </button>
+          <button
+            onClick={() => setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1))}
+            className="flex items-center justify-center border border-white/10 hover:border-white/30 transition-colors"
+            style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+          >
+            <ChevronRight className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      )}
+
     </section>
   );
 }

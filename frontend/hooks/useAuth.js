@@ -36,7 +36,7 @@ export const useAuth = () => {
           dispatch(setWishlist(result.data.user.wishlist.map((p) => p._id || p)));
         }
         dispatch(clearGuestCart());
-        toast.success('Registration successful! Welcome to ElectroNest 🎉');
+        toast.success('Registration successful! Welcome to Aspar 🎉');
         router.push('/');
         return { success: true };
       } catch (error) {

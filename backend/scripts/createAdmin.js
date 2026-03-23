@@ -12,9 +12,9 @@ const ADMIN_PASS  = 'admin@123';
 const ADMIN_NAME  = 'Admin';
 
 async function main() {
-  console.log('🔌 Connecting to MongoDB...');
+  console.log(' Connecting to MongoDB...');
   await mongoose.connect(process.env.MONGODB_URI);
-  console.log('✅ Connected to MongoDB');
+  console.log(' Connected to MongoDB');
 
   // Inline schema — avoids importing module that may have ESM issues from scripts/
   const userSchema = new mongoose.Schema(

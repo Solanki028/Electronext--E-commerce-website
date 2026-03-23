@@ -11,6 +11,8 @@ import { productService } from '@/services/productService';
 import { Package } from 'lucide-react';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
 
+const GOLD = '#b8976a';
+
 export default function CategoryPage() {
   const { slug } = useParams();
   const [category, setCategory] = useState(null);
@@ -44,44 +46,89 @@ export default function CategoryPage() {
   }, [category, page]);
 
   return (
-    <div className="container-custom py-8">
-      {/* Header */}
-      <div className="mb-8">
-        {category ? (
-          <>
-            <h1 className="text-3xl font-bold text-slate-900">{category.name}</h1>
-            {category.description && <p className="text-slate-500 mt-2">{category.description}</p>}
-            {!loading && <p className="text-sm text-slate-400 mt-1">{pagination.total} products found</p>}
-          </>
-        ) : (
-          <div className="space-y-2">
-            <div className="skeleton h-8 w-48 rounded" />
-            <div className="skeleton h-4 w-72 rounded" />
+    <div style={{ background: '#080808', minHeight: '100vh', paddingTop: '1px' }}>
+      <div className="container-custom py-12">
+        {/* Header */}
+        <div className="mb-12 pb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          {category ? (
+            <div className="flex flex-col items-center text-center max-w-3xl mx-auto pt-8">
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.65rem', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '1.5rem', display: 'block' }}>
+                Curated Collection
+              </span>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 'clamp(3rem, 6vw, 4.5rem)', fontWeight: 300, color: 'white', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>
+                {category.name}
+              </h1>
+              {category.description && (
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
+                  {category.description}
+                </p>
+              )}
+              {!loading && (
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2rem' }}>
+                  {pagination.total} {pagination.total === 1 ? 'Piece' : 'Pieces'}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center space-y-4 py-12">
+              <div className="h-4 w-32 bg-white/5 rounded-full animate-pulse" />
+              <div className="h-12 w-64 bg-white/5 rounded animate-pulse" />
+              <div className="h-4 w-96 bg-white/5 rounded animate-pulse" />
+            </div>
+          )}
+        </div>
+
+        {/* Sub-categories */}
+        {category?.children?.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {category.children.map(sub => (
+              <a 
+                key={sub._id} 
+                href={`/category/${sub.slug}`} 
+                className="px-6 py-2 transition-all duration-300 hover:text-white"
+                style={{ 
+                  border: '1px solid rgba(255,255,255,0.1)', 
+                  background: 'transparent',
+                  fontFamily: "'Montserrat', sans-serif", 
+                  fontSize: '0.7rem', 
+                  color: 'rgba(255,255,255,0.6)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.1em'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = GOLD;
+                  e.currentTarget.style.color = GOLD;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                }}
+              >
+                {sub.name}
+              </a>
+            ))}
           </div>
         )}
+
+        {!loading && products.length === 0 ? (
+          <div className="py-20 border border-[rgba(255,255,255,0.05)] bg-[#0a0a0a] flex items-center justify-center">
+            <EmptyState 
+              icon={Package} 
+              title="Collection Unavailable" 
+              description="There are currently no pieces available in this category. We invite you to explore our other collections." 
+              actionLabel="Discover All Pieces" 
+              actionHref="/products" 
+            />
+          </div>
+        ) : (
+          <>
+            <ProductGrid products={products} loading={loading} skeletonCount={ITEMS_PER_PAGE} />
+            {!loading && pagination.pages > 1 && (
+              <Pagination currentPage={page} totalPages={pagination.pages} onPageChange={setPage} className="mt-16" />
+            )}
+          </>
+        )}
       </div>
-
-      {/* Sub-categories */}
-      {category?.children?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {category.children.map(sub => (
-            <a key={sub._id} href={`/category/${sub.slug}`} className="px-4 py-1.5 rounded-full border text-sm font-medium hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors">
-              {sub.name}
-            </a>
-          ))}
-        </div>
-      )}
-
-      {!loading && products.length === 0 ? (
-        <EmptyState icon={Package} title="No products in this category" description="Check back later or browse all products." actionLabel="All Products" actionHref="/products" />
-      ) : (
-        <>
-          <ProductGrid products={products} loading={loading} skeletonCount={ITEMS_PER_PAGE} />
-          {!loading && pagination.pages > 1 && (
-            <Pagination currentPage={page} totalPages={pagination.pages} onPageChange={setPage} className="mt-10" />
-          )}
-        </>
-      )}
     </div>
   );
 }

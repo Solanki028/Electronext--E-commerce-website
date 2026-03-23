@@ -1,6 +1,6 @@
-# ElectroNest - Premium E-Commerce Platform ⚡
+# Aspar - Premium E-Commerce Platform ⚡
 
-ElectroNest is a full-stack, production-ready e-commerce platform built with modern web technologies. It offers a seamless shopping experience for customers and a comprehensive admin dashboard for store management.
+Aspar is a full-stack, production-ready e-commerce platform built with modern web technologies. It offers a seamless shopping experience for customers and a comprehensive admin dashboard for store management.
 
 ## 🚀 Features
 
@@ -70,8 +70,8 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Solanki028/Electronext--E-commerce-website.git
-   cd Electronext--E-commerce-website
+   git clone https://github.com/Solanki028/Aspar--E-commerce-website.git
+   cd Aspar--E-commerce-website
    ```
 
 2. **Install backend dependencies and run server**

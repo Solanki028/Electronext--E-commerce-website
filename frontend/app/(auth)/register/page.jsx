@@ -43,7 +43,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-primary-700 font-black text-2xl">
             <Zap className="w-7 h-7 fill-primary-700" />
-            ElectroNest
+            Aspar
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-slate-900">Create your account</h1>
           <p className="text-slate-500 mt-1">Join thousands of happy shoppers</p>
